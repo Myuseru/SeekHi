@@ -9,6 +9,8 @@ namespace SeekHi
         public bool AllowGreetingIfAlreadyTalked { get; set; } = true;
 
         public float TurnDelaySeconds { get; set; } = 0.75f;    
-        public float BubbleDelaySeconds { get; set; } = 1.00f;  
+        public float BubbleDelaySeconds { get; set; } = 1.00f;
+        public float GreetingCooldownSeconds { get; set; } = 5f;
+        public bool AlwaysRespond { get; set; } = false;
     }
 }

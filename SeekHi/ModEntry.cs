@@ -84,6 +84,23 @@ namespace SeekHi
                 min: 0f, max: 3.0f, interval: 0.05f,
                 formatVal: value => $"{value:F2} " + this.Helper.Translation.Get("config.seconds.unit")
             );
+            configMenu.AddNumberOption(
+                mod: this.ModManifest,
+                getValue: () => this.Config.GreetingCooldownSeconds,
+                setValue: value => this.Config.GreetingCooldownSeconds = value,
+                name: () => this.Helper.Translation.Get("config.cooldown.name"),
+                tooltip: () => this.Helper.Translation.Get("config.cooldown.desc"),
+                min: 1f, max: 60f, interval: 1f,
+                formatVal: value => $"{value:F0} " + this.Helper.Translation.Get("config.seconds.unit")
+            );
+            // 新增“始终回应”开关
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                getValue: () => this.Config.AlwaysRespond,
+                setValue: value => this.Config.AlwaysRespond = value,
+                name: () => this.Helper.Translation.Get("config.always-respond.name"),
+                tooltip: () => this.Helper.Translation.Get("config.always-respond.desc")
+            );
         }
 
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
@@ -91,7 +108,7 @@ namespace SeekHi
             if (!Context.IsPlayerFree) return;
             if (e.Button == this.Config.GreetingKey)
             {
-                if ((DateTime.Now - this._lastGreetingTime).TotalSeconds < 5.0) return;
+                if ((DateTime.Now - this._lastGreetingTime).TotalSeconds < this.Config.GreetingCooldownSeconds) return;
                 this._lastGreetingTime = DateTime.Now;
                 this.TriggerGreeting();
             }
@@ -111,7 +128,6 @@ namespace SeekHi
                 if (npc == null || !npc.IsVillager) continue;
                 if (npc is Child || npc is Pet || npc is Horse) continue;
 
-                // 检查距离
                 if (Vector2.Distance(playerTile, npc.Tile) > this.Config.SearchRadius) continue;
 
                 bool hasTalkedToday = player.friendshipData.TryGetValue(npc.Name, out var f) && f.TalkedToToday;
@@ -156,6 +172,10 @@ namespace SeekHi
 
         private bool DetermineIfNPCResponds(Farmer player, NPC npc)
         {
+            // 如果开启了始终回应，直接返回 true
+            if (this.Config.AlwaysRespond)
+                return true;
+
             int chance = 30 + (int)((player.getFriendshipLevelForNPC(npc.Name) / 2500f) * 50);
             if (npc.Manners == 1) chance += 20;
             else if (npc.Manners == 2) chance -= 20;

@@ -93,7 +93,6 @@ namespace SeekHi
                 min: 1f, max: 60f, interval: 1f,
                 formatVal: value => $"{value:F0} " + this.Helper.Translation.Get("config.seconds.unit")
             );
-            // 新增“始终回应”开关
             configMenu.AddBoolOption(
                 mod: this.ModManifest,
                 getValue: () => this.Config.AlwaysRespond,
@@ -172,7 +171,6 @@ namespace SeekHi
 
         private bool DetermineIfNPCResponds(Farmer player, NPC npc)
         {
-            // 如果开启了始终回应，直接返回 true
             if (this.Config.AlwaysRespond)
                 return true;
 
@@ -232,22 +230,22 @@ namespace SeekHi
 
             foreach (string baseKey in keys)
             {
-                List<int> ranNums = new List<int> { 1, 2, 3, 4, 5 };
-                for (int i = ranNums.Count - 1; i > 0; i--)
+                List<int> availableIndices = new List<int>();
+                int index = 1;
+
+                // 【核心修复】动态探查：不断自增检测后缀，突破 5 行的硬编码限制
+                while (this.Helper.Translation.Get($"{baseKey}.{index}").HasValue())
                 {
-                    int j = this.Randomizer.Next(i + 1);
-                    int temp = ranNums[i];
-                    ranNums[i] = ranNums[j];
-                    ranNums[j] = temp;
+                    availableIndices.Add(index);
+                    index++;
                 }
 
-                foreach (int num in ranNums)
+                if (availableIndices.Count > 0)
                 {
-                    var translation = this.Helper.Translation.Get($"{baseKey}.{num}");
-                    if (translation.HasValue())
-                    {
-                        return translation.Tokens(new { playerName = player.Name, npcName = npc.displayName }).ToString();
-                    }
+                    int randomIndex = availableIndices[this.Randomizer.Next(availableIndices.Count)];
+                    var translation = this.Helper.Translation.Get($"{baseKey}.{randomIndex}");
+
+                    return translation.Tokens(new { playerName = player.Name, npcName = npc.displayName }).ToString();
                 }
 
                 var directTranslation = this.Helper.Translation.Get(baseKey);

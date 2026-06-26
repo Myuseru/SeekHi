@@ -1,8 +1,8 @@
 {
   "Name": "Seek Hi",
   "Author": "kokin",
-  "Version": "1.0.0",
-  "Description": "可以在远处跟村民们打招呼并互动增加好感度的沉浸感模组。",
+  "Version": "1.1.0",
+  "Description": "Greet Villagers from a Distance",
   "UniqueID": "kokin.SeekHi",
   "EntryDll": "SeekHi.dll",
   "MinimumApiVersion": "4.0.0"
